@@ -1,0 +1,22 @@
+use girlscouts;
+
+SELECT *
+FROM dashboard
+INTO OUTFILE '/tmp/dashboard.csv'
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n';
+
+SELECT *
+FROM contacts
+INTO OUTFILE '/tmp/contacts.csv'
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n';
+
+SELECT *
+FROM troops
+INTO OUTFILE '/tmp/troops.csv'
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n';
