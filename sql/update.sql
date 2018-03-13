@@ -1,5 +1,7 @@
 use girlscouts;
 
+SET GLOBAL group_concat_max_len = 1000000;
+
 update roster set troop_id=replace(troop_id, "Troop", "");
 
 drop table if exists troops;
@@ -120,21 +122,56 @@ insert into troops (id, share_leader)
 ) on duplicate key update share_leader=values(share_leader);
 update troops set has_share_leader=if(share_leader is not null, 1 , 0);
 
+
+/** OVERVIEW **/
 drop table if exists dashboard;
 create table dashboard (
   `level` VARCHAR(255),
-  `number_troops` VARCHAR(20),
-  `number_girls` VARCHAR(20),
-  `number_leaders` VARCHAR(20)
+  `number_troops` VARCHAR(20) DEFAULT "-",
+  `number_girls` VARCHAR(20)  DEFAULT "-",
+  `number_leaders` VARCHAR(20) DEFAULT "-",
+  UNIQUE KEY idx_dashboard_level (level)
 ) CHARACTER SET utf8;
 
 
+insert into dashboard (level, number_troops, number_leaders) (
+   select COALESCE(level, "Not Specified"), count(distinct(id)), COALESCE(sum(number_leaders), 0) from troops group by level
+) on duplicate key update number_troops=values(number_troops), number_leaders=values(number_leaders);
+
+
+insert into dashboard (level, number_girls) (
+   select "1-Daisy",  count(email) as number_girls from roster where role="Girl" and grade in ("K", "1")
+) on duplicate key update number_girls=values(number_girls);
+
+insert into dashboard (level, number_girls) (
+   select "2-Brownie",  count(email) as number_girls from roster where role="Girl" and grade in ("2", "3")
+) on duplicate key update number_girls=values(number_girls);
+
+insert into dashboard (level, number_girls) (
+   select "3-Junior",  count(email) as number_girls from roster where role="Girl" and grade in ("4", "5")
+) on duplicate key update number_girls=values(number_girls);
+
+insert into dashboard (level, number_girls) (
+   select "4-Cadette",  count(email) as number_girls from roster where role="Girl" and grade in ("6", "7", "8")
+) on duplicate key update number_girls=values(number_girls);
+
+insert into dashboard (level, number_girls) (
+   select "5-Senior",  count(email) as number_girls from roster where role="Girl" and grade in ("9", "10")
+) on duplicate key update number_girls=values(number_girls);
+
+insert into dashboard (level, number_girls) (
+   select "6-Ambassador",  count(email) as number_girls from roster where role="Girl" and grade in ("11", "12")
+) on duplicate key update number_girls=values(number_girls);
+
+
 insert into dashboard (
-   select level, count(distinct(id)), sum(number_girls), sum(number_leaders) from troops where level is not null group by level
-);
-insert into dashboard (
-   select "Total" as level, count(distinct(id)), sum(number_girls), sum(number_leaders) from troops where level is not null
-);
+   select "Total" as level, count(distinct(id)), sum(number_girls), sum(number_leaders) from troops 
+) on duplicate key update number_troops=values(number_troops), number_leaders=values(number_leaders), number_girls=values(number_girls);
+
+
+/** Sanity check **/
+SELECT sum(number_girls) FROM girlscouts.dashboard d where level!="Total";
+select sum(number_girls) FROM girlscouts.dashboard d where level="Total";
 
 
 drop table if exists contacts;
@@ -159,3 +196,44 @@ insert into contacts  (
     select role, concat(first, " ", last) as name, email, troop_id from roster  where role not in ("Adult Members", "Girl", "Friends and Family Volunteer")
   ) as temp where role like "Service%" group by role
 );
+
+
+
+drop table if exists leader_roster;
+create table leader_roster (
+`id` VARCHAR(255) NOT NULL,
+`level` VARCHAR(255),
+`leaders` TEXT,
+`leader_emails` TEXT,
+`number_leaders` VARCHAR(20),
+`number_girls` VARCHAR(20),
+UNIQUE KEY idx_troop_id (id)
+)
+CHARACTER SET utf8;
+
+insert into leader_roster (id) select distinct troop_id from roster;
+
+/* get the levels */
+insert into leader_roster (id, level)
+(
+  select troop_id, group_concat(distinct(level)) fROM girlscouts.roster r where level != "" and troop_id not like "Service%" group by troop_id
+) on duplicate key update level=values(level);
+
+
+insert into leader_roster (id, leaders, leader_emails, number_leaders)
+(
+  select troop_id, group_concat(distinct(name) SEPARATOR ', '), group_concat(distinct(email) SEPARATOR ', '), count(distinct(name)) from (
+  select troop_id, concat(first, " ", last) as name, email FROM roster r where role="Troop Leader" order by email
+  ) as tmp group by troop_id
+) on duplicate key update leaders=values(leaders), leader_emails=values(leader_emails), number_leaders=values(number_leaders);
+
+
+insert into leader_roster (id, number_girls)
+(
+  select troop_id, count(distinct(name)) from (
+  select troop_id, concat(first, " ", left(last, 1), ".") as name, email FROM roster r where role="Girl" order by email
+  ) as tmp group by troop_id
+) on duplicate key update number_girls=values(number_girls);
+
+
+
