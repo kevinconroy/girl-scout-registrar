@@ -1,4 +1,5 @@
 drop database girlscouts;
+
 create database girlscouts;
 
 use girlscouts;

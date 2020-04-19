@@ -30,3 +30,12 @@ INTO OUTFILE '/tmp/leader_roster.csv'
 FIELDS TERMINATED BY ','
 ENCLOSED BY '"'
 LINES TERMINATED BY '\n';
+
+
+SELECT 
+id, level, leaders, girls, number_girls
+FROM troop_roster
+INTO OUTFILE '/tmp/troop_roster.csv'
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n';
