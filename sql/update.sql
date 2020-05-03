@@ -131,7 +131,7 @@ update troops set has_share_leader=if(share_leader is not null, 1 , 0);
 
 /** early birded girls **/
 insert into troops (id, girls_early_birded) (
-  SELECT troop_id, count(distinct(email)) as girls_early_birded FROM girlscouts.roster r where membership_type="Girl Membership" and membership_year="2020" group by troop_id
+  SELECT troop_id, count(distinct(email)) as girls_early_birded FROM girlscouts.roster r where membership_type="Girl Membership" and membership_year="2021" group by troop_id
 ) on duplicate key update girls_early_birded=values(girls_early_birded);
 
 

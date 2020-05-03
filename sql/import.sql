@@ -20,3 +20,4 @@ create table roster (
 `grade` VARCHAR(255),
 `school` VARCHAR(255)
 ) CHARACTER SET utf8;
+
