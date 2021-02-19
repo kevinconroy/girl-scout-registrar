@@ -1,6 +1,7 @@
 use girlscouts;
 
-SET GLOBAL group_concat_max_len = 1000000;
+SET GLOBAL group_concat_max_len = 10000000;
+SET session group_concat_max_len=10000000;
 
 update roster set troop_id=replace(troop_id, "Troop", "");
 
@@ -61,7 +62,6 @@ insert into troops (id, girls, number_girls)
   select troop_id, concat(first, " ", left(last, 1), ".") as name, email FROM roster r where role="Girl" order by email
   ) as tmp group by troop_id
 ) on duplicate key update girls=values(girls), number_girls=values(number_girls);
-
 
 
 insert into troops (id, volunteers, number_volunteers)
@@ -130,10 +130,11 @@ insert into troops (id, share_leader, share_leader_email)
 update troops set has_share_leader=if(share_leader is not null, 1 , 0);
 
 /** early birded girls **/
+/**
 insert into troops (id, girls_early_birded) (
-  SELECT troop_id, count(distinct(email)) as girls_early_birded FROM girlscouts.roster r where membership_type="Girl Membership" and membership_year="2021" group by troop_id
+  SELECT troop_id, count(distinct(email)) as girls_early_birded FROM girlscouts.roster r where membership_type="Girl" and membership_status="Active Membership" group by troop_id
 ) on duplicate key update girls_early_birded=values(girls_early_birded);
-
+**/
 
 /** OVERVIEW **/
 drop table if exists dashboard;
@@ -152,27 +153,27 @@ insert into dashboard (level, number_troops, number_leaders) (
 
 
 insert into dashboard (level, number_girls) (
-   select "1-Daisy",  count(email) as number_girls from roster where role="Girl" and grade in ("K", "1")
+   select "1-Daisy",  count(email) as number_girls from roster where role="Girl" and (grade like "%K%" or grade=1)
 ) on duplicate key update number_girls=values(number_girls);
 
 insert into dashboard (level, number_girls) (
-   select "2-Brownie",  count(email) as number_girls from roster where role="Girl" and grade in ("2", "3")
+   select "2-Brownie",  count(email) as number_girls from roster where role="Girl" and grade in (2, 3)
 ) on duplicate key update number_girls=values(number_girls);
 
 insert into dashboard (level, number_girls) (
-   select "3-Junior",  count(email) as number_girls from roster where role="Girl" and grade in ("4", "5")
+   select "3-Junior",  count(email) as number_girls from roster where role="Girl" and grade in (4, 5)
 ) on duplicate key update number_girls=values(number_girls);
 
 insert into dashboard (level, number_girls) (
-   select "4-Cadette",  count(email) as number_girls from roster where role="Girl" and grade in ("6", "7", "8")
+   select "4-Cadette",  count(email) as number_girls from roster where role="Girl" and grade in (6, 7, 8)
 ) on duplicate key update number_girls=values(number_girls);
 
 insert into dashboard (level, number_girls) (
-   select "5-Senior",  count(email) as number_girls from roster where role="Girl" and grade in ("9", "10")
+   select "5-Senior",  count(email) as number_girls from roster where role="Girl" and grade in (9, 10)
 ) on duplicate key update number_girls=values(number_girls);
 
 insert into dashboard (level, number_girls) (
-   select "6-Ambassador",  count(email) as number_girls from roster where role="Girl" and grade in ("11", "12")
+   select "6-Ambassador",  count(email) as number_girls from roster where role="Girl" and grade in (11, 12)
 ) on duplicate key update number_girls=values(number_girls);
 
 
@@ -181,6 +182,7 @@ insert into dashboard (
 ) on duplicate key update number_troops=values(number_troops), number_leaders=values(number_leaders), number_girls=values(number_girls);
 
 
+/**
 insert into dashboard (
    select "2021 Early Bird - Girl" as level, count(distinct(troop_id)), count(distinct(concat(first, last, email))), 0 from roster  where membership_type="Girl Membership" and membership_year="2021"
 ) on duplicate key update number_troops=values(number_troops), number_leaders=values(number_leaders), number_girls=values(number_girls);
@@ -189,7 +191,7 @@ insert into dashboard (
 insert into dashboard (
    select "2021 Early Bird - Adult" as level, count(distinct(troop_id)), 0, count(distinct(concat(first, last, email))) from roster  where membership_type="Adult Membership" and membership_year="2021"
 ) on duplicate key update number_troops=values(number_troops), number_leaders=values(number_leaders), number_girls=values(number_girls);
-
+**/
 
 /** Sanity check **/
 SELECT sum(number_girls) FROM girlscouts.dashboard d where level!="Total" and level not like "%Early Bird%";

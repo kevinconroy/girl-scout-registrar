@@ -1,5 +1,13 @@
+echo " You may need to run ' brew services start mysql '"
+echo ""
+
 mysql -uroot --local-infile=1 < sql/import.sql
-echo "" >> ~/Sites/girl-scout-registrar/import/roster.csv
+
+sed -i "" 's/"Maclay, MD"/Maclay/g' ~/Sites/girl-scout-registrar/import/roster.csv
+# But add trailing space back
+#echo "" >> ~/Sites/girl-scout-registrar/import/roster.csv
+
+#import it
 mysqlimport --replace --ignore-lines=1 --fields-terminated-by=, --verbose --local -uroot girlscouts ~/Sites/girl-scout-registrar/import/roster.csv
 mysql -uroot --local-infile=1 < sql/import-manual-fixes.sql
 mysql -uroot --local-infile=1 < sql/update.sql

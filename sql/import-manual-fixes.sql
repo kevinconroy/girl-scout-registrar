@@ -1,3 +1,5 @@
+SET GLOBAL group_concat_max_len = 10000000;
+SET session group_concat_max_len=10000000;
 
 use girlscouts;
 
