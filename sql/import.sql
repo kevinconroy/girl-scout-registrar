@@ -9,6 +9,7 @@ create table roster (
   `troop_id` VARCHAR(255),
   `level` VARCHAR(255),
   `start_date` VARCHAR(255),
+  `end_date` VARCHAR(255),
   `role` VARCHAR(255),  
   `background_check_status` VARCHAR(255),
   `first` VARCHAR(255),
@@ -23,8 +24,13 @@ create table roster (
   `primary_caregiver_last` VARCHAR(255),
   `primary_caregiver_phone` VARCHAR(255),
   `primary_caregiver_email` VARCHAR(255),
+  `address` TEXT,
+  `city` VARCHAR(255),
+  `state` VARCHAR(255),
+  `zip` VARCHAR(255),
   `membership_status` VARCHAR(255),
   `renewal_date` VARCHAR(255),
-  `school` VARCHAR(255),
-  `grade` TINYTEXT
+  `school` TEXT,
+  `grade` TEXT
 ) CHARACTER SET utf8;
+

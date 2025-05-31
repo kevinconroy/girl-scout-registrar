@@ -3,6 +3,7 @@ SET session group_concat_max_len=10000000;
 
 use girlscouts;
 
+/**
 insert into roster (su, troop_id, role, first, last, email) values
 ("SU 32-1", "02078", "First Aider", "Kelli", "Giffin", "kelligiffin@yahoo.com"),
 ("SU 32-1", "02078", "Troop Money Manager", "Leah", "Montas", "lbmontas@yahoo.com"),
@@ -26,8 +27,13 @@ insert into roster (su, troop_id, role, first, last, email) values
 ("SU 32-1", "32002", "Campout/Cookout Certified Adult", "Melissa", "Porter", "rancorswife@yahoo.com"),
 
 ("SU 32-1", "32010", "Troop Fall Product Manager", "Aurora", "Sanchez", "aurorasan99@gmail.com");
-
+**/
 
 update roster set email="heidyfoelsch@gmail.com" where email like "hfoelsch@%.net";
+update roster set email="mahays@gmail.com" where email like "mary.anne@hays.bz%";
 
-update roster set email="cjthomas_35@gmail.com" where email="cjthomas_35@yahoo.com";
+update roster set first="Warachaya Ally" where first="\"Warachaya \"Ally\"\"";
+
+
+
+/** update roster set email="cjthomas_35@gmail.com" where email="cjthomas_35@yahoo.com"; **/
